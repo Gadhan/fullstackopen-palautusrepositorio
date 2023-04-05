@@ -1,18 +1,22 @@
 import {useEffect, useState} from 'react'
-import axios from "axios";
+import './App.css'
 import Filter from "./components/Filter";
 import Persons from "./components/Persons";
 import PersonForm from "./components/PersonForm";
+import Notification from "./components/Notification";
+import personService from "./services/persons"
 
 const App = () => {
-  const [persons, setPersons] = useState([])
-  const [newName, setNewName] = useState('')
-  const [newNumber, setNewNumber] = useState('')
-  const [filter, setFilter] = useState('')
+    const [persons, setPersons] = useState([])
+    const [newName, setNewName] = useState('')
+    const [newNumber, setNewNumber] = useState('')
+    const [filter, setFilter] = useState('')
+    const [message, setMessage] = useState(null)
+    const [errorState, setErrorState] = useState(false)
 
   const getPersons = () => {
-    axios
-        .get('http://localhost:3001/persons')
+    personService
+        .getAll()
         .then(response => {
           setPersons(response.data)
         })
@@ -40,16 +44,66 @@ const App = () => {
       return acc
     }, names)
     if(names.includes(newName)){
-      alert(newName + " is already added to phonebook")
+      if(window.confirm(newName + " is already added to phonebook, replace the old number with a new one?")){
+          const newPerson = {
+              name: newName,
+              number: newNumber
+          }
+          const id = persons.find(person => person.name === newName).id
+          personService
+              .update(id, newPerson)
+              .then(response => {
+                  console.log(response)
+                  getPersons()
+                  setNewName('')
+                  setNewNumber('')
+                  setMessage(newName + ' updated')
+                  setTimeout(()=>{
+                      setMessage(null)
+                  }, 5000)
+              })
+              .catch(error => {
+                  console.log(error)
+                  setErrorState(true)
+                  setMessage('Information of ' + newName + ' has already been removed from the server')
+                  setTimeout(()=>{
+                      setMessage(null)
+                      setErrorState(false)
+                  }, 5000)
+              })
+      }
     }else{
       const newPerson = {
         name: newName,
         number: newNumber
       }
-      setPersons(persons.concat(newPerson))
+      personService
+          .create(newPerson)
+          .then(response => {
+              setPersons(persons.concat(response.data))
+              setNewName('')
+              setNewNumber('')
+              setMessage('Added ' + newName)
+              setTimeout(()=>{
+                  setMessage(null)
+              }, 5000)
+          })
     }
-    setNewName('')
-    setNewNumber('')
+  }
+
+  const deletePerson = (id, name) =>{
+      if(window.confirm("Delete " + name + "?")){
+          personService
+              .del(id)
+              .then(response => {
+                  console.log(response)
+                  getPersons()
+                  setMessage(name + ' deleted')
+                  setTimeout(()=>{
+                      setMessage(null)
+                  }, 5000)
+              })
+      }
   }
 
   const personsToShow = filter === ''
@@ -58,17 +112,18 @@ const App = () => {
 
   return (
       <div>
-        <h2>Phonebook</h2>
-        <Filter filter={filter} onChange={handleFilterChange}/>
-        <h3>add a new</h3>
-        <PersonForm
-            onSubmit={addPerson}
-            name={newName}
-            nameOnChange={handleNameChange}
-            number={newNumber}
-            numberOnChange={handleNumberChange} />
-        <h3>Numbers</h3>
-        <Persons persons={personsToShow} />
+          <Notification isError={errorState} message={message}/>
+          <h2>Phonebook</h2>
+          <Filter filter={filter} onChange={handleFilterChange}/>
+          <h3>add a new</h3>
+          <PersonForm
+              onSubmit={addPerson}
+              name={newName}
+              nameOnChange={handleNameChange}
+              number={newNumber}
+              numberOnChange={handleNumberChange} />
+          <h3>Numbers</h3>
+          <Persons persons={personsToShow} deleteFn={deletePerson}/>
       </div>
   )
 }
