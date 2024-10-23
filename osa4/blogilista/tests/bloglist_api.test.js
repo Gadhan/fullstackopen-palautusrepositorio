@@ -18,6 +18,14 @@ test('there are two blogs', async () => {
 
     assert.strictEqual(response.body.length, 2)
 })
+test.only('field named id exists for every entry', async () => {
+    const response = await api.get('/api/blogs')
+
+    const body = response.body
+    const allHaveIds = body.every(blog => blog.id !== undefined)
+
+    assert.strictEqual(allHaveIds, true)
+})
 
 after(async () => {
     await mongoose.connection.close()
