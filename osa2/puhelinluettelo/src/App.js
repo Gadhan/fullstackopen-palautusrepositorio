@@ -54,13 +54,13 @@ const App = () => {
               .update(id, newPerson)
               .then(response => {
                   console.log(response)
-                  getPersons()
                   setNewName('')
                   setNewNumber('')
                   setMessage(newName + ' updated')
                   setTimeout(()=>{
                       setMessage(null)
                   }, 5000)
+                  getPersons()
               })
               .catch(error => {
                   console.log(error)
@@ -80,12 +80,21 @@ const App = () => {
       personService
           .create(newPerson)
           .then(response => {
-              setPersons(persons.concat(response.data))
+              setPersons(persons.concat(response.data["returnPerson"]))
               setNewName('')
               setNewNumber('')
               setMessage('Added ' + newName)
               setTimeout(()=>{
                   setMessage(null)
+              }, 5000)
+          })
+          .catch(error => {
+              console.log(error)
+              setErrorState(true)
+              setMessage('Name or number fields not filled')
+              setTimeout(()=>{
+                  setMessage(null)
+                  setErrorState(false)
               }, 5000)
           })
     }
