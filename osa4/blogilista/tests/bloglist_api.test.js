@@ -106,6 +106,28 @@ test('if no votes is given, default to 0', async () => {
     assert(votesField == 0)
 })
 
+test('if no title or url is given, receive 400 bad request', async () => {
+    const noTitle = {
+        author: "Test",
+        url: "NoTitle.com"
+    }
+
+    const noUrl = {
+        author: "Test",
+        title: "No URL"
+    }
+
+    await api
+        .post('/api/blogs')
+        .send(noTitle)
+        .expect(400)
+
+    await api
+        .post('/api/blogs')
+        .send(noUrl)
+        .expect(400)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
