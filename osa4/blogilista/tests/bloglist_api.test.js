@@ -85,6 +85,27 @@ test('blog can be deleted', async () => {
     assert(!finalState.body.includes(blogToDelete))
 })
 
+test('if no votes is given, default to 0', async () => {
+    const body = {
+        author: "Test",
+        title: "No votes",
+        url: "NoVotes.com"
+    }
+
+    let votesField
+
+    await api
+        .post('/api/blogs')
+        .send(body)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+        .expect(function(res){
+            votesField = res.body.votes
+        })
+
+    assert(votesField == 0)
+})
+
 after(async () => {
     await mongoose.connection.close()
 })
