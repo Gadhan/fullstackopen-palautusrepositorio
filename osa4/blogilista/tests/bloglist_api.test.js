@@ -103,7 +103,7 @@ test('if no votes is given, default to 0', async () => {
             votesField = res.body.votes
         })
 
-    assert(votesField == 0)
+    assert(votesField === 0)
 })
 
 test('if no title or url is given, receive 400 bad request', async () => {
@@ -126,6 +126,27 @@ test('if no title or url is given, receive 400 bad request', async () => {
         .post('/api/blogs')
         .send(noUrl)
         .expect(400)
+})
+
+test.only('blogs can be updated', async () => {
+    const initialState = await api.get('/api/blogs')
+    const blogToUpdate = initialState.body[0]
+    const newBlog = {
+        author: blogToUpdate.author,
+        title: blogToUpdate.title,
+        url: blogToUpdate.url,
+        votes: blogToUpdate.votes + 1
+    }
+
+    await api
+        .put('/api/blogs/' + blogToUpdate.id)
+        .send(newBlog)
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+
+    const finalState = await api.get('/api/blogs')
+
+    assert.strictEqual(finalState.body[0].votes, blogToUpdate.votes + 1)
 })
 
 after(async () => {
