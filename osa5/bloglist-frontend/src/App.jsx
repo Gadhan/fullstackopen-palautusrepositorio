@@ -10,6 +10,10 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
+  const [author, setAuthor] = useState('')
+  const [title, setTitle] = useState('')
+  const [url, setUrl] = useState('')
+
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
@@ -20,7 +24,6 @@ const App = () => {
     const loggedUser = window.localStorage.getItem('loggedBloglistUser')
     if(loggedUser){
       const user = JSON.parse(loggedUser)
-      console.log(user)
       setUser(user)
     }
   }, [])
@@ -34,6 +37,7 @@ const App = () => {
       window.localStorage.setItem(
           'loggedBloglistUser', JSON.stringify((user))
       )
+      blogService.setToken(user.token)
       setUser(user)
       setUsername('')
       setPassword('')
@@ -48,7 +52,22 @@ const App = () => {
   const logOut = (event) => {
     event.preventDefault()
     setUser(null)
+    blogService.setToken(null)
     window.localStorage.removeItem('loggedBloglistUser')
+  }
+
+  const addBlog = async (event) => {
+    event.preventDefault()
+    const body = {
+      author: author,
+      title: title,
+      url: url
+    }
+    const response = await blogService.create(body)
+    setBlogs(blogs.concat(response))
+    setTitle('')
+    setAuthor('')
+    setUrl('')
   }
 
   const loginForm = () => (
@@ -79,6 +98,39 @@ const App = () => {
       </div>
   )
 
+  const addBlogForm = () => (
+    <form onSubmit={addBlog}>
+      <div>
+        author
+        <input
+        type="text"
+        value={author}
+        name="Author"
+        onChange={({target}) => setAuthor(target.value)}
+        />
+      </div>
+      <div>
+        title
+        <input
+            type="text"
+            value={title}
+            name="Title"
+            onChange={({target}) => setTitle(target.value)}
+        />
+      </div>
+      <div>
+        url
+        <input
+            type="text"
+            value={url}
+            name="URL"
+            onChange={({target}) => setUrl(target.value)}
+        />
+      </div>
+      <button type="submit">Add blog</button>
+    </form>
+  )
+
   return (
     <div>
       {(user)
@@ -87,6 +139,7 @@ const App = () => {
             <h2>blogs</h2>
             {errorMessage}
             {user.name} logged in. <button onClick={logOut}>log out</button>
+            {addBlogForm()}
             {blogs.map(blog =>
                 <Blog key={blog.id} blog={blog} />
             )}
