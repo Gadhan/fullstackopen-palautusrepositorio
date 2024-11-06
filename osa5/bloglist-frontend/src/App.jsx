@@ -42,10 +42,7 @@ const App = () => {
       setUsername('')
       setPassword('')
     } catch (exception) {
-      setErrorMessage('wrong credentials')
-      setTimeout(() => {
-        setErrorMessage(null)
-      }, 5000)
+      showNotification('wrong credentials')
     }
   }
 
@@ -68,6 +65,14 @@ const App = () => {
     setTitle('')
     setAuthor('')
     setUrl('')
+    showNotification(`A new blog ${body.title} by ${body.author} added`)
+  }
+
+  const showNotification = (message) => {
+    setErrorMessage(message)
+    setTimeout(() => {
+      setErrorMessage(null)
+    }, 5000)
   }
 
   const loginForm = () => (
@@ -137,8 +142,8 @@ const App = () => {
           ?
           <div>
             <h2>blogs</h2>
-            {errorMessage}
-            {user.name} logged in. <button onClick={logOut}>log out</button>
+            <p>{errorMessage}</p>
+            <div>{user.name} logged in. <button onClick={logOut}>log out</button></div>
             {addBlogForm()}
             {blogs.map(blog =>
                 <Blog key={blog.id} blog={blog} />
