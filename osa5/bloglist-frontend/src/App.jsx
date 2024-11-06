@@ -9,6 +9,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
+  const [addBlogVisible, setAddBlogVisible] = useState(false)
 
   const [author, setAuthor] = useState('')
   const [title, setTitle] = useState('')
@@ -65,6 +66,7 @@ const App = () => {
     setTitle('')
     setAuthor('')
     setUrl('')
+    setAddBlogVisible(false)
     showNotification(`A new blog ${body.title} by ${body.author} added`)
   }
 
@@ -133,6 +135,7 @@ const App = () => {
         />
       </div>
       <button type="submit">Add blog</button>
+      <button onClick={() => setAddBlogVisible(false)}>Cancel</button>
     </form>
   )
 
@@ -144,7 +147,11 @@ const App = () => {
             <h2>blogs</h2>
             <p>{errorMessage}</p>
             <div>{user.name} logged in. <button onClick={logOut}>log out</button></div>
-            {addBlogForm()}
+            {(addBlogVisible)?
+                addBlogForm()
+            :
+                <button onClick={() => setAddBlogVisible(true)}>Add blog</button>
+            }
             {blogs.map(blog =>
                 <Blog key={blog.id} blog={blog} />
             )}
