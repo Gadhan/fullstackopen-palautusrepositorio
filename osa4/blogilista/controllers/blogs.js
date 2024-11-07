@@ -19,6 +19,10 @@ blogsRouter.get('/', async(request, response) => {
 
 blogsRouter.post('/', async (request, response, next) => {
     const blog = new Blog(request.body)
+
+    if(request.headers.authorization === undefined){
+        return response.status(400).json({error: 'no token provided'})
+    }
     const decodedToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
 
     if (!decodedToken.id) {
@@ -26,7 +30,6 @@ blogsRouter.post('/', async (request, response, next) => {
     }
     const user = await User.findById(decodedToken.id)
     blog.user = user.id
-
     try {
         const savedBlog = await blog.save()
         response.status(201).json(savedBlog)

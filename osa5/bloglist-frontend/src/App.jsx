@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import AddBlogForm from "./components/AddBlogForm";
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -10,10 +11,6 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
   const [addBlogVisible, setAddBlogVisible] = useState(false)
-
-  const [author, setAuthor] = useState('')
-  const [title, setTitle] = useState('')
-  const [url, setUrl] = useState('')
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -54,20 +51,18 @@ const App = () => {
     window.localStorage.removeItem('loggedBloglistUser')
   }
 
-  const addBlog = async (event) => {
-    event.preventDefault()
-    const body = {
-      author: author,
-      title: title,
-      url: url
-    }
-    const response = await blogService.create(body)
-    setBlogs(blogs.concat(response))
-    setTitle('')
-    setAuthor('')
-    setUrl('')
+  const addBlog = (blogObject) => {
+    blogService
+        .create(blogObject)
+        .then(returnedBlog => {
+          setBlogs(blogs.concat(returnedBlog))
+          showNotification(`A new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
+        })
+        .catch(error => {
+          if(error.status === 400)
+            showNotification("Session expired, please log out and log in")
+        })
     setAddBlogVisible(false)
-    showNotification(`A new blog ${body.title} by ${body.author} added`)
   }
 
   const showNotification = (message) => {
@@ -105,6 +100,7 @@ const App = () => {
       </div>
   )
 
+  /*
   const addBlogForm = () => (
     <form onSubmit={addBlog}>
       <div>
@@ -135,9 +131,8 @@ const App = () => {
         />
       </div>
       <button type="submit">Add blog</button>
-      <button onClick={() => setAddBlogVisible(false)}>Cancel</button>
     </form>
-  )
+  )*/
 
   return (
     <div>
@@ -148,7 +143,10 @@ const App = () => {
             <p>{errorMessage}</p>
             <div>{user.name} logged in. <button onClick={logOut}>log out</button></div>
             {(addBlogVisible)?
-                addBlogForm()
+                <div>
+                  <AddBlogForm createBlog={addBlog}/>
+                  <button onClick={() => setAddBlogVisible(false)}>Cancel</button>
+                </div>
             :
                 <button onClick={() => setAddBlogVisible(true)}>Add blog</button>
             }
