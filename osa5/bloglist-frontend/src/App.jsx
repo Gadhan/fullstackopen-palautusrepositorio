@@ -78,6 +78,17 @@ const App = () => {
         })
   }
 
+  const deleteBlog = (id) => {
+    if(window.confirm("Are you sure you want to delete the blog?")){
+      blogService
+          .del(id)
+          .then(response => {
+            console.log(response)
+            setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== id))
+          })
+    }
+  }
+
   const showNotification = (message) => {
     setErrorMessage(message)
     setTimeout(() => {
@@ -130,7 +141,7 @@ const App = () => {
                 <button onClick={() => setAddBlogVisible(true)}>Add blog</button>
             }
             {blogs.map(blog =>
-                <Blog key={blog.id} blog={blog} handleVote={voteBlog} />
+                <Blog key={blog.id} blog={blog} handleVote={voteBlog} loggedUser={user} handleDelete={deleteBlog}/>
             )}
           </div>
           :
