@@ -65,6 +65,18 @@ const App = () => {
     setAddBlogVisible(false)
   }
 
+  const voteBlog = (votedBlog) => {
+    votedBlog.votes += 1
+    delete votedBlog.user //Vaikka tehtävässä 5.8 sanotaan että operaatio korvaa koko blogin, niin näin ei käy minulla. Vanhentunutta tietoa?
+    blogService
+        .update(votedBlog)
+        .then(returnedBlog => {
+          setBlogs((prevBlogs) =>
+          prevBlogs.map((blog) =>
+          blog.id === returnedBlog.id ? {...blog, votes: returnedBlog.votes} : blog))
+        })
+  }
+
   const showNotification = (message) => {
     setErrorMessage(message)
     setTimeout(() => {
@@ -100,40 +112,6 @@ const App = () => {
       </div>
   )
 
-  /*
-  const addBlogForm = () => (
-    <form onSubmit={addBlog}>
-      <div>
-        author
-        <input
-        type="text"
-        value={author}
-        name="Author"
-        onChange={({target}) => setAuthor(target.value)}
-        />
-      </div>
-      <div>
-        title
-        <input
-            type="text"
-            value={title}
-            name="Title"
-            onChange={({target}) => setTitle(target.value)}
-        />
-      </div>
-      <div>
-        url
-        <input
-            type="text"
-            value={url}
-            name="URL"
-            onChange={({target}) => setUrl(target.value)}
-        />
-      </div>
-      <button type="submit">Add blog</button>
-    </form>
-  )*/
-
   return (
     <div>
       {(user)
@@ -151,7 +129,7 @@ const App = () => {
                 <button onClick={() => setAddBlogVisible(true)}>Add blog</button>
             }
             {blogs.map(blog =>
-                <Blog key={blog.id} blog={blog} />
+                <Blog key={blog.id} blog={blog} handleVote={voteBlog} />
             )}
           </div>
           :
