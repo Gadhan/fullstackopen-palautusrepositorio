@@ -48,3 +48,33 @@ test('renders rest of content when show button is pressed', async () => {
     expect(div).toHaveTextContent('MattiTest.com')
     expect(div).toHaveTextContent('0 votes')
 })
+
+test('blog gets two votes when the like button is pressed twice'), async () => {
+    const blog = {
+        author: 'Matti Meikalainen',
+        title: 'Matin testi blogi',
+        url: 'MattiTest.com',
+        votes: 0,
+        user: {
+            name: 'Matti Meikalainen',
+            id: 12345
+        }
+    }
+
+    const loggedUser = {
+        id: 12345
+    }
+
+    const mockHandler = vi.fn()
+
+    render(<Blog blog={blog} loggedUser={loggedUser} handleVote={mockHandler} />)
+
+    const user = userEvent.setup()
+    const showButton = screen.getByText('show')
+    await user.click(showButton)
+    const likeButton = screen.getByText('like')
+    await user.click(likeButton)
+    await user.click(likeButton)
+
+    expect(mockHandler.mock.calls).toHaveLength(2)
+}
