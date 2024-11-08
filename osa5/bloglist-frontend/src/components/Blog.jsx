@@ -12,7 +12,7 @@ const Blog = ({ blog, handleVote, loggedUser, handleDelete }) => {
   const [show, setShow] = useState(false)
 
   return(
-      <div style={{border: '1px solid'}}>
+      <div className='blog' style={{border: '1px solid'}}>
         {blog.title} by {blog.author} {show?
           <div>
             <button onClick={() => setShow(false)}>hide</button>
