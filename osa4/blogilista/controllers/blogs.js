@@ -31,8 +31,9 @@ blogsRouter.post('/', async (request, response, next) => {
     const user = await User.findById(decodedToken.id)
     blog.user = user.id
     try {
-        const savedBlog = await blog.save()
-        response.status(201).json(savedBlog)
+        let savedBlog = await blog.save()
+        const responseBody = await Blog.findById(savedBlog.id).populate('user', {username: 1, name: 1, id: 1})
+        response.status(201).json(responseBody)
         const user = await User.findById(blog.user)
         user.blogs = user.blogs.concat(savedBlog.id)
         user.save()
@@ -52,7 +53,7 @@ blogsRouter.delete('/:id', async(request, response, next) => {
 
 blogsRouter.put('/:id', async (request, response, next) => {
     try{
-        const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true})
+        const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true}).populate('user', {username: 1, name: 1, id: 1})
         response.json(updatedBlog)
     }catch(exception) {
         next(exception)

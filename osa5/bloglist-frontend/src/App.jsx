@@ -56,7 +56,9 @@ const App = () => {
     blogService
         .create(blogObject)
         .then(returnedBlog => {
-          setBlogs(blogs.concat(returnedBlog))
+          console.log("addBlog returnedBlog")
+          console.log(returnedBlog)
+          setBlogs(blogs.concat(returnedBlog).sort((a, b) => b.votes - a.votes))
           showNotification(`A new blog ${returnedBlog.title} by ${returnedBlog.author} added`)
         })
         .catch(error => {
@@ -67,14 +69,15 @@ const App = () => {
   }
 
   const voteBlog = (votedBlog) => {
-    votedBlog.votes += 1
-    delete votedBlog.user //Vaikka tehtävässä 5.8 sanotaan että operaatio korvaa koko blogin, niin näin ei käy minulla. Vanhentunutta tietoa?
+    let body = {...votedBlog}
+    body.votes = votedBlog.votes + 1
+    body.user = votedBlog.user.id
     blogService
-        .update(votedBlog)
+        .update(body)
         .then(returnedBlog => {
-          setBlogs((prevBlogs) =>
-          prevBlogs.map((blog) =>
-          blog.id === returnedBlog.id ? {...blog, votes: returnedBlog.votes} : blog))
+          const newBlogs = blogs.map((blog) =>blog.id === returnedBlog.id ? {...blog, votes: returnedBlog.votes} : blog)
+          newBlogs.sort((a, b) => b.votes - a.votes)
+          setBlogs(newBlogs)
         })
   }
 
